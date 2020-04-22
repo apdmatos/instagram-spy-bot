@@ -4,6 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, load_only
 import datetime
+from sqlalchemy.sql import text
 
 Base = declarative_base()
 
@@ -49,21 +50,15 @@ class Persistence:
         self._session.commit()
 
     def get_stopped_following(self, current_iteration, last_iteration):
-        subquery = self._session.query(Following)\
-            .filter(Following.iteration==current_iteration)\
-            .options(load_only("id"))
+        result = self._session.execute(
+            'SELECT username FROM following WHERE iteration=:previous AND username not in (select username from following where iteration=:current)',
+            {'current': current_iteration, 'previous': last_iteration})
 
-        return self._session.query(Following) \
-            .filter(Following.id.notin_(subquery)) \
-            .filter(Following.iteration == last_iteration) \
-            .all()
+        return [row[0] for row in result]
 
     def get_started_following(self, current_iteration, last_iteration):
-        subquery = self._session.query(Following)\
-            .filter(Following.iteration==last_iteration)\
-            .options(load_only("id"))
+        result = self._session.execute(
+            'SELECT * FROM following WHERE iteration == :current AND username not in (select username from following where iteration ==:previous)',
+            {'current': current_iteration, 'previous': last_iteration})
 
-        return self._session.query(Following) \
-            .filter(Following.id.notin_(subquery)) \
-            .filter(Following.iteration == current_iteration) \
-            .all()
+        return [row[0] for row in result]

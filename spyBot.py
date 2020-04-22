@@ -62,9 +62,9 @@ class SpyBot:
 
         return user['pk']
 
-    def printUsers(self, users):
-        for user in users:
-            logger.info(user.username)
+    def printUsers(self, usernames):
+        for username in usernames:
+            logger.info(username)
 
     def start(self):
 
