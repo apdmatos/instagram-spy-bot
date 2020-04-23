@@ -58,7 +58,7 @@ class Persistence:
 
     def get_started_following(self, current_iteration, last_iteration):
         result = self._session.execute(
-            'SELECT * FROM following WHERE iteration == :current AND username not in (select username from following where iteration ==:previous)',
+            'SELECT username FROM following WHERE iteration == :current AND username not in (select username from following where iteration ==:previous)',
             {'current': current_iteration, 'previous': last_iteration})
 
         return [row[0] for row in result]
