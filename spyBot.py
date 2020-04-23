@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class SpyBot:
-    def __init__(self, username, password, spy_username, stop_on_failures=10):
+    def __init__(self, username, password, spy_username):
         self._username = username
         self._password = password
         self._spy_username = spy_username
