@@ -88,4 +88,9 @@ class SpyBot:
         self.printUsers(stopped)
 
         logger.info("--------------------------------------")
+
+        if len(started) == 0 and len(stopped):
+            logger.info("Nothing has happened. deleting downloaded users")
+            self.persistence.delete_all_iteration(new_iteration)
+
         logger.info('Bye!')
