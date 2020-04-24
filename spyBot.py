@@ -33,7 +33,7 @@ class SpyBot:
 
         rank_token = self.api.generate_uuid()
         following = pagination.page(self.api.user_following,
-                                     args={'user_id': user_id, 'rank_token': rank_token}, wait=10)
+                                     args={'user_id': user_id, 'rank_token': rank_token}, wait=20)
         count = 0
         it = iter(following)
         while True:
@@ -85,29 +85,30 @@ class SpyBot:
 
             if user_id is None:
                 logger.error("user {} not found".format(self._spy_username))
-            else:
-                self._download_all_following(user_id, new_iteration)
-
-            started = self.persistence.get_started_following(new_iteration, iteration)
-            logger.info("--------------------------------------")
-            logger.info("started following {} users".format(len(started)))
-            self.printUsers(started)
-
-            stopped = self.persistence.get_stopped_following(new_iteration, iteration)
-            logger.info("--------------------------------------")
-            logger.info("stopped following {} users".format(len(stopped)))
-            self.printUsers(stopped)
-
-            logger.info("--------------------------------------")
-
-            self._sendMessage(started, stopped)
-
-            if len(started) == 0 and len(stopped) == 0:
-                logger.info("Nothing has happened. deleting downloaded users")
-                self.persistence.delete_all_iteration(new_iteration)
-
-            if self._pooling_interval_hours == 0:
                 break
+            else:
+                downloaded = self._download_all_following(user_id, new_iteration)
+                if downloaded:
+                    started = self.persistence.get_started_following(new_iteration, iteration)
+                    logger.info("--------------------------------------")
+                    logger.info("started following {} users".format(len(started)))
+                    self.printUsers(started)
+
+                    stopped = self.persistence.get_stopped_following(new_iteration, iteration)
+                    logger.info("--------------------------------------")
+                    logger.info("stopped following {} users".format(len(stopped)))
+                    self.printUsers(stopped)
+
+                    logger.info("--------------------------------------")
+
+                    self._sendMessage(started, stopped)
+
+                    if len(started) == 0 and len(stopped) == 0:
+                        logger.info("Nothing has happened. deleting downloaded users")
+                        self.persistence.delete_all_iteration(new_iteration)
+
+                    if self._pooling_interval_hours == 0:
+                        break
 
             logger.info("sleeping for {} hours".format(self._pooling_interval_hours))
             time.sleep(self._pooling_interval_hours * 3600)
